@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  mariadb-master:
+    image: mariadb:11
+    container_name: mariadb_master
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: demo
+    ports:
+      - "3307:3306"   # внешний клиент подключается к 3307
+    volumes:
+      - ./master/my.cnf:/etc/mysql/my.cnf:ro
+      - ./master/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - master-data:/var/lib/mysql
+    networks:
+      - labnet
+
+  mariadb-slave:
+    image: mariadb:11
+    container_name: mariadb_slave
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3308:3306"   # внешний клиент при необходимости подключается к 3308
+    volumes:
+      - ./slave/my.cnf:/etc/mysql/my.cnf:ro
+      - slave-data:/var/lib/mysql
+    depends_on:
+      - mariadb-master
+    networks:
+      - labnet
+
+  php-fpm:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: php_fpm_lab
+    volumes:
+      - ./web:/var/www/html:cached
+    depends_on:
+      - mariadb-master
+    networks:
+      - labnet
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: nginx_lab
+    ports:
+      - "8000:80"     # веб-интерфейс
+    volumes:
+      - ./web:/var/www/html:ro
+      - ./nginx_default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php-fpm
+    networks:
+      - labnet
+
+volumes:
+  master-data:
+  slave-data:
+
+networks:
+  labnet:
+    driver: bridge
+
