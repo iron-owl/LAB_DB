@@ -1,15 +1,27 @@
 # Подготовка стенда
 
+Стенд представляет собой контейнеры docker, управляемые через docker compose.
+
+Скачать содержимое репозитория себе, например, в `/opt'.
+```bash
+git clone https://github.com/iron-owl/LAB_DB/
+```
+
 ## Запуск стенда
 
+Сборка контейнера php:
 ```bash
-root@vm-ubnt:/opt/lab_db# cd /opt/lab_db/
-root@vm-ubnt:/opt/lab_db# docker compose up -d
-[+] Running 4/4
- ✔ Container mariadb_master  Running                                                                                                                    0.0s
- ✔ Container php_fpm_lab     Running                                                                                                                    0.0s
- ✔ Container nginx_lab       Running                                                                                                                    0.0s
- ✔ Container mariadb_slave   Started                                                                                                                    0.0s
+cd /opt/LAB_DB/
+docker compose build
+```
+
+```bash
+cd /opt/lab_db/
+docker compose up -d
+```
+
+Проверка:
+```bash
 root@vm-ubnt:/opt/lab_db# docker compose ps
 NAME             IMAGE               COMMAND                  SERVICE          CREATED          STATUS          PORTS
 mariadb_master   mariadb:11          "docker-entrypoint.s…"   mariadb-master   29 seconds ago   Up 27 seconds   0.0.0.0:3307->3306/tcp, :::3307->3306/tcp
